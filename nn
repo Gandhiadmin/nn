@@ -1,0 +1,285 @@
+ 1.
+  
+  
+ import tensorflow as tf
+
+vector_a = tf.constant([1, 2, 3], dtype=tf.float32)
+vector_b = tf.constant([4, 5, 6], dtype=tf.float32)
+
+result = tf.add(vector_a, vector_b)
+result1 = tf.multiply(vector_a, vector_b)
+result2 = tf.subtract(vector_a, vector_b)
+result3 = tf.divide(vector_a, vector_b)
+
+print("Result of vector addition:", result.numpy())
+print("Result of vector multiply:", result1.numpy())
+print("Result of vector subtract:", result2.numpy())
+print("Result of vector divide:", result3.numpy())
+
+
+.....................................................................................................................................................
+
+2.
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+
+# Generating synthetic data
+np.random.seed(42)
+X = np.random.rand(1000, 5)
+y = 3 * X[:, 0] + 2 * X[:, 1] - 5 * X[:, 2] + np.random.randn(1000)
+
+# Splitting and scaling the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train, X_test = scaler.fit_transform(X_train), scaler.transform(X_test)
+
+# Defining and compiling the model
+model = Sequential([Input(shape=(X_train.shape[1],)), Dense(64, activation='relu'), 
+                    Dense(32, activation='relu'), Dense(1)])
+model.compile(optimizer='adam', loss='mse')
+
+# Training the model
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, verbose=1)
+
+# Evaluating the model
+mse = mean_squared_error(y_test, model.predict(X_test))
+print(f"Mean Squared Error on Test Set: {mse}")
+
+# Plotting the training and validation loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Model Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+
+.........................................................................................................................
+
+
+3...
+
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+
+# Generate dummy data for AND gate
+x_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y_train = np.array([[0], [0], [0], [1]])
+
+# Define the model
+model = Sequential()
+# Input layer
+model.add(Input(shape=(x_train.shape[1],)))  # Input layer needs the correct import
+model.add(Dense(64, activation='relu'))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1))  # Output layer
+
+# Compile the model
+model.compile(optimizer='sgd', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(x_train, y_train, epochs=100, verbose=0)
+
+# Test the model
+y_pred = model.predict(x_train)
+
+# Print the predictions
+print("Test Input: ", x_train)
+print("Predicted Output: ", y_pred)
+
+
+....................................................................................................
+
+
+4..
+
+
+
+from tensorflow.keras import Sequential, layers
+
+# Define model architecture
+model = Sequential([
+    layers.Input(shape=(100,)),  # Input layer with specified input shape
+    layers.Dense(32, activation='sigmoid'),  # Hidden layer
+    layers.Dense(1, activation='sigmoid')    # Output layer
+])
+
+# Compile model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Model summary
+model.summary()
+
+
+....................................................................................................................
+
+5 ....
+
+
+import tensorflow as tf
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
+
+# Load and preprocess dataset
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train, x_test = x_train.reshape(-1, 28, 28, 1) / 255.0, x_test.reshape(-1, 28, 28, 1) / 255.0
+y_train, y_test = to_categorical(y_train, 10), to_categorical(y_test, 10)
+
+# Define and compile model
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    MaxPooling2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train and evaluate model
+model.fit(x_train, y_train, epochs=10, batch_size=128, validation_split=0.2, verbose=1)
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+print("\nTest accuracy:", test_acc)
+
+
+.......................................................................................................................
+
+
+7...
+
+
+
+import tensorflow as tf
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.optimizers import Adam
+
+# Load and preprocess the CIFAR-10 dataset
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+x_train, x_test = x_train / 255.0, x_test / 255.0
+y_train = tf.keras.utils.to_categorical(y_train, 10)
+y_test = tf.keras.utils.to_categorical(y_test, 10)
+
+# Load VGG16 model without top layer and freeze its layers
+base_model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+base_model.trainable = False  # Freeze all layers of VGG16
+
+# Build and compile the model
+model = Sequential([
+    base_model,
+    Flatten(),
+    Dense(256, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+model.compile(optimizer=Adam(0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.1)
+
+# Evaluate the model
+test_loss, test_accuracy = model.evaluate(x_test, y_test)
+print(f'Test Accuracy: {test_accuracy}')
+
+
+
+
+.....................................................................................................................
+
+
+
+8...
+
+
+import tensorflow as tf
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, GlobalAveragePooling2D
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# Load and preprocess the CIFAR-10 dataset
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+x_train, x_test = x_train / 255.0, x_test / 255.0  # Normalize the images
+y_train = tf.keras.utils.to_categorical(y_train, 10)  # One-hot encode labels
+y_test = tf.keras.utils.to_categorical(y_test, 10)
+
+# Load pre-trained VGG16 model without the top layer
+base_model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+
+# Freeze the layers of the pre-trained model
+base_model.trainable = False
+
+# Build the model
+model = Sequential([
+    base_model,
+    GlobalAveragePooling2D(),  # Pooling layer to reduce spatial dimensions
+    Dense(256, activation='relu'),
+    Dense(10, activation='softmax')  # Output layer for 10 classes
+])
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.1)
+
+# Evaluate the model
+test_loss, test_accuracy = model.evaluate(x_test, y_test)
+print(f'Test Accuracy: {test_accuracy}')
+
+
+..............................................................................................................................
+
+
+9...
+
+
+
+import tensorflow as tf
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
+from tensorflow.keras.optimizers import Adam
+
+# Load IMDb dataset
+num_words = 10000
+max_length = 500
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=num_words)
+
+# Pad sequences for uniform length
+x_train = pad_sequences(x_train, maxlen=max_length)
+x_test = pad_sequences(x_test, maxlen=max_length)
+
+# Build RNN model
+model = Sequential([
+    Embedding(input_dim=num_words, output_dim=64, input_length=max_length),
+    SimpleRNN(64),
+    Dense(1, activation='sigmoid')
+])
+
+# Compile model
+model.compile(optimizer=Adam(0.001), loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train model
+model.fit(x_train, y_train, epochs=5, batch_size=32, validation_split=0.2)
+
+# Evaluate model
+test_loss, test_accuracy = model.evaluate(x_test, y_test)
+print(f'Test Accuracy: {test_accuracy}')
